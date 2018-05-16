@@ -1,0 +1,29 @@
+#!/usr/bin/env ruby
+
+#
+# Usage: dftest host server_name
+#
+
+require 'net/https'
+require 'uri'
+
+def normalize(host)
+  host.start_with?('http://', 'https://') ? host : "https://#{host}"
+end
+
+def print_response(response)
+  response.each do |header, value|
+    puts "> #{header}: #{value}"
+  end
+  puts
+  puts response.body
+end
+
+host_uri = ::URI.parse(normalize(::ARGV[0]))
+server_name_uri = ::URI.parse(normalize(::ARGV[1]))
+
+::Net::HTTP.start(server_name_uri.host, 443, use_ssl: true) do |http|
+  request = ::Net::HTTP::Get.new(host_uri)
+  response = http.request(request)
+  print_response(response)
+end
